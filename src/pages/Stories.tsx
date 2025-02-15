@@ -8,7 +8,8 @@ interface Story {
   id: number;
   username: string;
   content: string;
-  imageUrl: string;
+  mediaUrl: string;
+  mediaType: "image" | "video";
   views: number;
   likes: number;
   timestamp: string;
@@ -37,11 +38,14 @@ const Stories = () => {
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
+        const mediaType = file.type.startsWith("image/") ? "image" : "video";
+        
         const story: Story = {
           id: Date.now(),
           username: currentUsername,
           content: "",
-          imageUrl: reader.result as string,
+          mediaUrl: reader.result as string,
+          mediaType,
           views: 0,
           likes: 0,
           timestamp: new Date().toLocaleString(),
@@ -105,7 +109,7 @@ const Stories = () => {
         <label className="cursor-pointer">
           <input
             type="file"
-            accept="image/*"
+            accept="image/*, video/*"
             onChange={handleFileUpload}
             className="hidden"
           />
@@ -123,11 +127,21 @@ const Stories = () => {
             className="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden"
             onClick={() => handleView(story.id)}
           >
-            <img
-              src={story.imageUrl}
-              alt={`Story de ${story.username}`}
-              className="w-full h-48 object-cover"
-            />
+            {story.mediaType === "image" ? (
+              <img
+                src={story.mediaUrl}
+                alt={`Story de ${story.username}`}
+                className="w-full h-48 object-cover"
+              />
+            ) : (
+              <video
+                src={story.mediaUrl}
+                className="w-full h-48 object-cover"
+                controls
+                muted
+                playsInline
+              />
+            )}
             <div className="p-4 space-y-2">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">
