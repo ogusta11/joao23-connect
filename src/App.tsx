@@ -9,6 +9,7 @@ import Home from "./pages/Index";
 import Profile from "./pages/Profile";
 import Search from "./pages/Search";
 import Notifications from "./pages/Notifications";
+import Stories from "./pages/Stories";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -49,6 +50,14 @@ const App = () => (
             element={
               <Layout>
                 <Notifications />
+              </Layout>
+            }
+          />
+          <Route
+            path="/stories"
+            element={
+              <Layout>
+                <Stories />
               </Layout>
             }
           />
