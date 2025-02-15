@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Check, Heart, MessageCircle } from "lucide-react";
+import { Check, Heart, MessageCircle, Trash, Ban } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface Post {
@@ -13,6 +13,7 @@ interface Post {
   comments: Comment[];
   isVerified: boolean;
   timestamp: string;
+  userPhoto: string;
 }
 
 interface Comment {
@@ -22,6 +23,7 @@ interface Comment {
   likes: number;
   isVerified: boolean;
   timestamp: string;
+  userPhoto: string;
 }
 
 const Index = () => {
@@ -30,11 +32,15 @@ const Index = () => {
   const [newPost, setNewPost] = useState("");
   const [currentUsername, setCurrentUsername] = useState("");
   const [isVerified, setIsVerified] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [bannedUsers, setBannedUsers] = useState<string[]>([]);
 
   useEffect(() => {
     const username = localStorage.getItem("username") || "";
+    const userPhoto = localStorage.getItem("photoUrl") || "/placeholder.svg";
     setCurrentUsername(username);
     setIsVerified(username.toLowerCase() === "ogusta");
+    setIsAdmin(username.toLowerCase() === "ogusta");
   }, []);
 
   const handleCreatePost = () => {
@@ -56,6 +62,8 @@ const Index = () => {
       return;
     }
 
+    const userPhoto = localStorage.getItem("photoUrl") || "/placeholder.svg";
+
     const post: Post = {
       id: Date.now(),
       username: currentUsername,
@@ -64,6 +72,7 @@ const Index = () => {
       comments: [],
       isVerified,
       timestamp: new Date().toLocaleString(),
+      userPhoto,
     };
 
     setPosts([post, ...posts]);
@@ -85,6 +94,8 @@ const Index = () => {
   const handleComment = (postId: number, commentContent: string) => {
     if (!commentContent.trim()) return;
 
+    const userPhoto = localStorage.getItem("photoUrl") || "/placeholder.svg";
+
     setPosts(
       posts.map((post) => {
         if (post.id === postId) {
@@ -95,6 +106,7 @@ const Index = () => {
             likes: 0,
             isVerified,
             timestamp: new Date().toLocaleString(),
+            userPhoto,
           };
           return {
             ...post,
@@ -104,6 +116,23 @@ const Index = () => {
         return post;
       })
     );
+  };
+
+  const handleDeletePost = (postId: number) => {
+    setPosts(posts.filter((post) => post.id !== postId));
+    toast({
+      title: "Sucesso",
+      description: "Post deletado com sucesso!",
+    });
+  };
+
+  const handleBanUser = (username: string) => {
+    setBannedUsers([...bannedUsers, username]);
+    setPosts(posts.filter((post) => post.username !== username));
+    toast({
+      title: "Usuário Banido",
+      description: `O usuário ${username} foi banido com sucesso!`,
+    });
   };
 
   return (
@@ -120,6 +149,21 @@ const Index = () => {
         </Button>
       </div>
 
+      {isAdmin && (
+        <div className="bg-red-50 p-4 rounded-lg shadow-sm">
+          <h2 className="font-semibold text-red-700 mb-2">Painel de Administrador</h2>
+          <div className="space-y-2">
+            {bannedUsers.length > 0 ? (
+              <div className="text-sm text-gray-600">
+                Usuários banidos: {bannedUsers.join(", ")}
+              </div>
+            ) : (
+              <div className="text-sm text-gray-600">Nenhum usuário banido</div>
+            )}
+          </div>
+        </div>
+      )}
+
       <div className="space-y-4">
         {posts.map((post) => (
           <PostCard
@@ -128,6 +172,9 @@ const Index = () => {
             onLike={handleLike}
             onComment={handleComment}
             currentUsername={currentUsername}
+            isAdmin={isAdmin}
+            onDeletePost={handleDeletePost}
+            onBanUser={handleBanUser}
           />
         ))}
       </div>
@@ -140,30 +187,56 @@ const PostCard = ({
   onLike,
   onComment,
   currentUsername,
+  isAdmin,
+  onDeletePost,
+  onBanUser,
 }: {
   post: Post;
   onLike: (id: number) => void;
   onComment: (id: number, content: string) => void;
   currentUsername: string;
+  isAdmin: boolean;
+  onDeletePost: (id: number) => void;
+  onBanUser: (username: string) => void;
 }) => {
   const [showComments, setShowComments] = useState(false);
   const [newComment, setNewComment] = useState("");
 
   return (
     <div className="bg-white rounded-lg shadow-sm p-4 space-y-4">
-      <div className="flex items-center space-x-2">
-        <img
-          src="/placeholder.svg"
-          alt={post.username}
-          className="w-10 h-10 rounded-full"
-        />
-        <div>
-          <div className="flex items-center space-x-1">
-            <span className="font-medium">{post.username}</span>
-            {post.isVerified && <Check className="w-4 h-4 text-blue-500" />}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-2">
+          <img
+            src={post.userPhoto}
+            alt={post.username}
+            className="w-10 h-10 rounded-full object-cover"
+          />
+          <div>
+            <div className="flex items-center space-x-1">
+              <span className="font-medium">{post.username}</span>
+              {post.isVerified && <Check className="w-4 h-4 text-blue-500" />}
+            </div>
+            <span className="text-sm text-gray-600">{post.timestamp}</span>
           </div>
-          <span className="text-sm text-gray-600">{post.timestamp}</span>
         </div>
+        {isAdmin && (
+          <div className="flex space-x-2">
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={() => onDeletePost(post.id)}
+            >
+              <Trash className="w-4 h-4" />
+            </Button>
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={() => onBanUser(post.username)}
+            >
+              <Ban className="w-4 h-4" />
+            </Button>
+          </div>
+        )}
       </div>
 
       <p className="text-gray-800">{post.content}</p>
@@ -213,9 +286,9 @@ const PostCard = ({
               >
                 <div className="flex items-center space-x-2">
                   <img
-                    src="/placeholder.svg"
+                    src={comment.userPhoto}
                     alt={comment.username}
-                    className="w-6 h-6 rounded-full"
+                    className="w-6 h-6 rounded-full object-cover"
                   />
                   <div className="flex items-center space-x-1">
                     <span className="font-medium">{comment.username}</span>
