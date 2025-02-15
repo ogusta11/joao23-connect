@@ -137,12 +137,12 @@ const Index = () => {
 
   return (
     <div className="animate-fadeIn space-y-6">
-      <div className="bg-white p-4 rounded-lg shadow-sm space-y-4">
+      <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm space-y-4">
         <Textarea
           value={newPost}
           onChange={(e) => setNewPost(e.target.value)}
           placeholder="O que está acontecendo?"
-          className="resize-none"
+          className="resize-none dark:bg-gray-700 dark:text-white"
         />
         <Button onClick={handleCreatePost} className="w-full">
           Publicar
@@ -150,15 +150,19 @@ const Index = () => {
       </div>
 
       {isAdmin && (
-        <div className="bg-red-50 p-4 rounded-lg shadow-sm">
-          <h2 className="font-semibold text-red-700 mb-2">Painel de Administrador</h2>
+        <div className="bg-red-50 dark:bg-red-900/20 p-4 rounded-lg shadow-sm">
+          <h2 className="font-semibold text-red-700 dark:text-red-400 mb-2">
+            Painel de Administrador
+          </h2>
           <div className="space-y-2">
             {bannedUsers.length > 0 ? (
-              <div className="text-sm text-gray-600">
+              <div className="text-sm text-gray-600 dark:text-gray-300">
                 Usuários banidos: {bannedUsers.join(", ")}
               </div>
             ) : (
-              <div className="text-sm text-gray-600">Nenhum usuário banido</div>
+              <div className="text-sm text-gray-600 dark:text-gray-300">
+                Nenhum usuário banido
+              </div>
             )}
           </div>
         </div>
@@ -203,7 +207,7 @@ const PostCard = ({
   const [newComment, setNewComment] = useState("");
 
   return (
-    <div className="bg-white rounded-lg shadow-sm p-4 space-y-4">
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 space-y-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-2">
           <img
@@ -213,10 +217,12 @@ const PostCard = ({
           />
           <div>
             <div className="flex items-center space-x-1">
-              <span className="font-medium">{post.username}</span>
+              <span className="font-medium dark:text-white">{post.username}</span>
               {post.isVerified && <Check className="w-4 h-4 text-blue-500" />}
             </div>
-            <span className="text-sm text-gray-600">{post.timestamp}</span>
+            <span className="text-sm text-gray-600 dark:text-gray-400">
+              {post.timestamp}
+            </span>
           </div>
         </div>
         {isAdmin && (
@@ -239,19 +245,19 @@ const PostCard = ({
         )}
       </div>
 
-      <p className="text-gray-800">{post.content}</p>
+      <p className="text-gray-800 dark:text-gray-200">{post.content}</p>
 
       <div className="flex items-center space-x-4">
         <button
           onClick={() => onLike(post.id)}
-          className="flex items-center space-x-1 text-gray-600 hover:text-primary transition-colors"
+          className="flex items-center space-x-1 text-gray-600 dark:text-gray-400 hover:text-primary transition-colors"
         >
           <Heart className="w-5 h-5" />
           <span>{post.likes}</span>
         </button>
         <button
           onClick={() => setShowComments(!showComments)}
-          className="flex items-center space-x-1 text-gray-600 hover:text-primary transition-colors"
+          className="flex items-center space-x-1 text-gray-600 dark:text-gray-400 hover:text-primary transition-colors"
         >
           <MessageCircle className="w-5 h-5" />
           <span>{post.comments.length}</span>
@@ -265,7 +271,7 @@ const PostCard = ({
               value={newComment}
               onChange={(e) => setNewComment(e.target.value)}
               placeholder="Escreva um comentário..."
-              className="resize-none"
+              className="resize-none dark:bg-gray-700 dark:text-white"
             />
             <Button
               onClick={() => {
@@ -282,7 +288,7 @@ const PostCard = ({
             {post.comments.map((comment) => (
               <div
                 key={comment.id}
-                className="bg-gray-50 rounded-lg p-3 space-y-2"
+                className="bg-gray-50 dark:bg-gray-700 rounded-lg p-3 space-y-2"
               >
                 <div className="flex items-center space-x-2">
                   <img
@@ -291,16 +297,20 @@ const PostCard = ({
                     className="w-6 h-6 rounded-full object-cover"
                   />
                   <div className="flex items-center space-x-1">
-                    <span className="font-medium">{comment.username}</span>
+                    <span className="font-medium dark:text-white">
+                      {comment.username}
+                    </span>
                     {comment.isVerified && (
                       <Check className="w-3 h-3 text-blue-500" />
                     )}
                   </div>
-                  <span className="text-xs text-gray-600">
+                  <span className="text-xs text-gray-600 dark:text-gray-400">
                     {comment.timestamp}
                   </span>
                 </div>
-                <p className="text-gray-800">{comment.content}</p>
+                <p className="text-gray-800 dark:text-gray-200">
+                  {comment.content}
+                </p>
               </div>
             ))}
           </div>
